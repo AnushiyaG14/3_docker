@@ -1,15 +1,27 @@
-# 1) Use official Python base image
+# ---------- Stage 1: builder ----------
+FROM python:3.11-slim AS builder
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir -r requirements.txt
+
+# ---------- Stage 2: runtime ----------
 FROM python:3.11-slim
 
-# 2) Set working directory inside container
-WORKDIR / app
+WORKDIR /app
 
-# 3) Copy dependency file and install packages
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Copy installed packages from builder
+COPY --from=builder /usr/local /usr/local
 
-# 4) Copy application code
+# Copy application code
 COPY app ./app
 
-# 5) Run FastAPI using uvicorn
+# Environment variables
+ENV PYTHONUNBUFFERED=1
+ENV APP_ENV=production
+
+EXPOSE 8000
+
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
