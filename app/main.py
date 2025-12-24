@@ -8,6 +8,6 @@ APP_NAME = os.getenv("APP_NAME", "FastAPI App")
 @app.get("/health")
 def health():
     return {
-        "status": "ok",
+        "status": "success",
         "app": APP_NAME
     }
